@@ -17,6 +17,12 @@ from datetime import datetime
 #deleting old files
 import schedual_deletion
 
+#arguments
+import argparse
+
+#for my ip
+import socket    
+
 class GetHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed_path = parse.urlparse(self.path)
@@ -76,10 +82,22 @@ class GetHandler(BaseHTTPRequestHandler):
 class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
     """Handle requests in a separate thread."""
 
-PORT = 8000
 if __name__ == '__main__':
-    schedual_deletion.start_job()
+    parser = argparse.ArgumentParser(description='Youtube download server with automatic download of old files')
+    parser.add_argument('-port', type=int, default=8000, help="Port number for server")
+    parser.add_argument('-days', type=int, default=30, help="Max age of downloaded files before they get deleted")
+    args = parser.parse_args()
+    PORT = args.port
+    assert PORT > 1023 and PORT < 65535, "Port must be in range 1024-65534"
+    DAYS = args.days
+
+    schedual_deletion.start_job(DAYS)
+    hostname = socket.gethostname()    
+    IPAddr = socket.gethostbyname(hostname) 
+
     server = ThreadedHTTPServer(('', PORT), GetHandler)
     print('Server started on port', PORT)
+    print('For download call:')
+    print(str(IPAddr)+":"+str(PORT)+"/getVideo?id=[YOUTUBE ID]")
     print('Use <Ctrl-C> to stop.')
     server.serve_forever()
