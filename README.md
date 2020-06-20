@@ -6,6 +6,6 @@ Upon a certain duration all videos are deleeted.
 
 Needs "schedule" and "youtube_dl" to be installed
 
-Run python3 "youtube_download_server.py -h" for options
+Run "python3 youtube_download_server.py -h" for options
 
 One issue is after main process is killed the scheduler continues to run. That process needs to be killed manually.
