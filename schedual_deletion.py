@@ -4,7 +4,7 @@ import threading
 import logging
 import os
 import datetime
-import daemon
+# import daemon
 
 format = "%(asctime)s: %(message)s"
 logging.basicConfig(format=format, level=logging.INFO,datefmt="%H:%M:%S")
