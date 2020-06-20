@@ -10,25 +10,44 @@ from socketserver import ThreadingMixIn
 from urllib import parse
 import sys, os
 
+#TumeStamp
+import time;
+from datetime import datetime
+
+#deleting old files
+import schedual_deletion
+
 class GetHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed_path = parse.urlparse(self.path)
-        fileName = 'failed'
         if parsed_path.path == '/getVideo':
             print("\nNew request:")
-            try:    
+            try:
                 youtudeId = parsed_path.query.split("=")[1]
                 full_path = 'https://www.youtube.com/watch?v=' + youtudeId
 
-                fileName = 'videos/'+youtudeId+'.mp4'
+                ts = time.time()
+                # timeObj = time.localtime(ts)
+                dateTimeObj = datetime.now()
+                timestampStr = dateTimeObj.strftime("%Y-%m-%d")
+                # video_title = "%d-%d-%d" % (timeObj.tm_year,timeObj.tm_mon, timeObj.tm_mday)
+                video_title = timestampStr
+                ydl_opts = {}
+                with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+                    info_dict = ydl.extract_info(full_path, download=False)
+                    youtube_title = info_dict.get('title', None)
+                    youtube_title = ''.join(e for e in youtube_title if (e.isalnum() and e.isascii()) or e ==' ' or e =='-' )
+                    youtube_title = youtube_title.replace("\\","")
+                    youtube_title = youtube_title.replace("/","")
+                    video_title += " " + youtudeId + " " + youtube_title
+
+                fileName = 'videos/'+video_title+'.mp4'
+                print("filename",fileName)
                 ydl_opts = {'outtmpl': fileName}
                 with youtube_dl.YoutubeDL(ydl_opts) as ydl:
                     info_dict = ydl.extract_info(full_path, download=True)
-                    video_id = info_dict.get("id", None)
-                    video_title = info_dict.get('title', None)
-                    video_title = ''.join(e for e in video_title if e.isascii()) + ".mp4"
                     print("\nDownloaded:",video_title)
-                    print("Youtube ID:",video_id)
+                    print("Youtube ID:",youtudeId)
 
                 with open(fileName, 'rb') as file: 
                     self.send_response(200)
@@ -59,6 +78,7 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 
 PORT = 8000
 if __name__ == '__main__':
+    schedual_deletion.start_job()
     server = ThreadedHTTPServer(('', PORT), GetHandler)
     print('Server started on port', PORT)
     print('Use <Ctrl-C> to stop.')
