@@ -45,7 +45,7 @@ class GetHandler(BaseHTTPRequestHandler):
                     youtube_title = ''.join(e for e in youtube_title if (e.isalnum() and e.isascii()) or e ==' ' or e =='-' )
                     youtube_title = youtube_title.replace("\\","")
                     youtube_title = youtube_title.replace("/","")
-                    video_title += " " + youtudeId + " " + youtube_title
+                    video_title += " " + youtudeId + " " + youtube_title.strip()
 
                 fileName = 'videos/'+video_title+'.mp4'
                 print("filename",fileName)
@@ -59,7 +59,7 @@ class GetHandler(BaseHTTPRequestHandler):
                     self.send_response(200)
                     self.send_header("Content-Type", 'application/octet-stream')
                     self.send_header("Content-Disposition",
-                        'attachment; filename="{}"'.format(video_title))
+                        'attachment; filename="{}"'.format(fileName))
                     fs = os.fstat(file.fileno())
                     self.send_header("Content-Length", str(fs.st_size))
                     self.end_headers()
@@ -92,8 +92,8 @@ if __name__ == '__main__':
     DAYS = args.days
 
     schedual_deletion.start_job(DAYS)
-    hostname = socket.gethostname()    
-    IPAddr = socket.gethostbyname(hostname) 
+    hostname = socket.gethostname()
+    IPAddr = socket.gethostbyname(hostname)
 
     server = ThreadedHTTPServer(('', PORT), GetHandler)
     print('Server started on port', PORT)

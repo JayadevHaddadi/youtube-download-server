@@ -2,7 +2,7 @@ import schedule
 import time
 import threading
 import logging
-import os
+import os, sys
 import datetime
 # import daemon
 
@@ -21,8 +21,17 @@ def delete_old():
         date = file.split()[0]
         time_stamp = time.mktime(datetime.datetime.strptime(date,"%Y-%m-%d").timetuple())
         if(time_stamp < (now - days_old_files*24 * 3600)):
-            os.remove(file_path)
-            print("Old file Removed:", file_path)
+            try:
+                os.remove(file_path)
+                print("Old file Removed:", file_path)
+            except Exception as e:
+                print("\n----- BEGIN DELETION EXCEPTION ------")
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                print(exc_type, fname, exc_tb.tb_lineno)
+                print(e)
+                print("------ END DELETION EXCEPTION ------")
+    
     print("Done checking")
 
 def thread_function():
