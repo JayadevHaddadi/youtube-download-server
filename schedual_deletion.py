@@ -31,7 +31,7 @@ def delete_old():
                 print(exc_type, fname, exc_tb.tb_lineno)
                 print(e)
                 print("------ END DELETION EXCEPTION ------")
-    
+
     print("Done checking")
 
 def thread_function():

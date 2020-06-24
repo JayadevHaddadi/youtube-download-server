@@ -1,5 +1,5 @@
 #For youtube download
-from __future__ import unicode_literals 
+from __future__ import unicode_literals
 import youtube_dl
 
 # For server
@@ -21,13 +21,14 @@ import schedual_deletion
 import argparse
 
 #for my ip
-import socket    
+import socket
 
 class GetHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         parsed_path = parse.urlparse(self.path)
         if parsed_path.path == '/getVideo':
-            print("\nNew request:")
+            now = datetime.now()
+            print("\n\n-----------",now.strftime("%Y-%m-%d %H:%M:%S"),"New request from",self.client_address[0])
             try:
                 youtudeId = parsed_path.query.split("=")[1]
                 full_path = 'https://www.youtube.com/watch?v=' + youtudeId
@@ -52,10 +53,10 @@ class GetHandler(BaseHTTPRequestHandler):
                 ydl_opts = {'outtmpl': fileName}
                 with youtube_dl.YoutubeDL(ydl_opts) as ydl:
                     info_dict = ydl.extract_info(full_path, download=True)
-                    print("\nDownloaded:",video_title)
-                    print("Youtube ID:",youtudeId)
+                    # print("\nDownloaded:",video_title)
+                    # print("Youtube ID:",youtudeId)
 
-                with open(fileName, 'rb') as file: 
+                with open(fileName, 'rb') as file:
                     self.send_response(200)
                     self.send_header("Content-Type", 'application/octet-stream')
                     self.send_header("Content-Disposition",
@@ -63,8 +64,8 @@ class GetHandler(BaseHTTPRequestHandler):
                     fs = os.fstat(file.fileno())
                     self.send_header("Content-Length", str(fs.st_size))
                     self.end_headers()
-                    self.wfile.write(file.read()) 
-                    print("File successfully sent!")
+                    self.wfile.write(file.read())
+                    print("----",fileName,"File successfully sent!\n")
 
             except BrokenPipeError as e:
                 print("Client cancelled request for",youtudeId)
